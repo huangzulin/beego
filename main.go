@@ -3,36 +3,45 @@ package main
 import (
 	"beego/model"
 	"encoding/json"
-	"fmt"
 	"github.com/redpois0n/wallpaper"
 	"gopkg.in/resty.v1"
 	"io/ioutil"
 	"math/rand"
+	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func main() {
 
-	n:=strconv.Itoa(rand.Intn(100 - 1) + 1)
-
-	resp, err := resty.R().Get("http://www.bing.com/HPImageArchive.aspx?format=js&idx="+n+"&n=1&mkt=zh-CN")
+	rand.Seed(time.Now().UnixNano())
+	idx :=  strconv.Itoa(random(1, 7))
+	//mkt := "zh-CN"
+	mkt :=""
+	resp, err := resty.R().Get("http://www.bing.com/HPImageArchive.aspx?format=js&idx="+idx+"&n=8&mkt="+mkt)
 	if err!=nil {
 	}
 
 	wall := model.Wallpaper{}
 	json.Unmarshal([]byte(resp.String()), &wall)
 
-	url := "http://www.bing.com"+wall.Images[0].URL
+	length := len(wall.Images)
+	n :=  random(1, length)
+	url := "http://www.bing.com"+wall.Images[n].URL
 
 	imgResp,err := resty.R().Get(url)
 	path,err:=filepath.Abs("wallpaper.png")
-	fmt.Println(path)
+
 	ioutil.WriteFile(path,imgResp.Body(),0)
 	path = strings.Replace(path,"\\","/",-1)
 	wallpaper.SetWallpaper(path)
+	time.Sleep(1 * time.Second)
+	os.Remove(path)
 
-	//os.Remove(path)
+}
 
+func random(min int, max int) int {
+	return rand.Intn(max-min) + min
 }
