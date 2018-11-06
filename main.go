@@ -28,8 +28,10 @@ func main() {
 	json.Unmarshal([]byte(resp.String()), &wall)
 
 	length := len(wall.Images)
-	n :=  random(1, length)
+	rand.Seed(time.Now().UnixNano())
+	n :=  random(0, length-1)
 	url := "http://www.bing.com"+wall.Images[n].URL
+	println("设置的壁纸："+url)
 
 	imgResp,err := resty.R().Get(url)
 	path,err:=filepath.Abs("wallpaper.png")
